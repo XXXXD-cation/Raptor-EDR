@@ -233,23 +233,23 @@ func (c *GRPCClient) SendHeartbeat(ctx context.Context, req *agentv1.HeartbeatRe
 }
 
 // ConvertEventToProto converts internal event models to protobuf format
-func ConvertEventToProto(event models.BaseEvent) *agentv1.Event {
+func ConvertEventToProto(event models.Event) *agentv1.Event {
 	protoEvent := &agentv1.Event{
-		Id:        event.ID,
-		EventType: string(event.EventType),
-		AgentId:   event.AgentID,
-		Hostname:  event.Hostname,
-		Platform:  event.Platform,
-		Tags:      event.Tags,
+		Id:        event.GetID(),
+		EventType: string(event.GetEventType()),
+		AgentId:   event.GetAgentID(),
+		Hostname:  event.GetHostname(),
+		Platform:  event.GetPlatform(),
+		Tags:      event.GetTags(),
 	}
 
 	// Convert timestamp
-	if !event.Timestamp.IsZero() {
-		protoEvent.Timestamp = timestamppb.New(event.Timestamp)
+	if !event.GetTimestamp().IsZero() {
+		protoEvent.Timestamp = timestamppb.New(event.GetTimestamp())
 	}
 
 	// Convert event-specific data based on type
-	switch event.EventType {
+	switch event.GetEventType() {
 	case models.ProcessCreate, models.ProcessExit:
 		if processEvent, ok := event.(models.ProcessEvent); ok {
 			protoEvent.EventData = &agentv1.Event_ProcessEvent{

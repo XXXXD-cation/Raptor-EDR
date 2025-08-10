@@ -34,6 +34,17 @@ const (
 	AuthFailed EventType = "auth_failed"
 )
 
+// Event interface defines common methods for all telemetry events
+type Event interface {
+	GetID() string
+	GetTimestamp() time.Time
+	GetEventType() EventType
+	GetAgentID() string
+	GetHostname() string
+	GetPlatform() string
+	GetTags() map[string]string
+}
+
 // BaseEvent contains common fields for all telemetry events
 type BaseEvent struct {
 	ID        string            `json:"id" bson:"_id"`
@@ -44,6 +55,15 @@ type BaseEvent struct {
 	Platform  string            `json:"platform" bson:"platform"` // linux, windows, macos
 	Tags      map[string]string `json:"tags,omitempty" bson:"tags,omitempty"`
 }
+
+// Implement Event interface for BaseEvent
+func (e BaseEvent) GetID() string                   { return e.ID }
+func (e BaseEvent) GetTimestamp() time.Time         { return e.Timestamp }
+func (e BaseEvent) GetEventType() EventType         { return e.EventType }
+func (e BaseEvent) GetAgentID() string              { return e.AgentID }
+func (e BaseEvent) GetHostname() string             { return e.Hostname }
+func (e BaseEvent) GetPlatform() string             { return e.Platform }
+func (e BaseEvent) GetTags() map[string]string      { return e.Tags }
 
 // ProcessEvent represents process creation/termination events
 type ProcessEvent struct {
@@ -114,8 +134,8 @@ type AuthEvent struct {
 
 // TelemetryBatch represents a batch of events from an agent
 type TelemetryBatch struct {
-	AgentID   string      `json:"agent_id" bson:"agent_id"`
-	Timestamp time.Time   `json:"timestamp" bson:"timestamp"`
-	Events    []BaseEvent `json:"events" bson:"events"`
-	Signature string      `json:"signature,omitempty" bson:"signature,omitempty"` // For integrity verification
+	AgentID   string    `json:"agent_id" bson:"agent_id"`
+	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
+	Events    []Event   `json:"events" bson:"events"`
+	Signature string    `json:"signature,omitempty" bson:"signature,omitempty"` // For integrity verification
 } 

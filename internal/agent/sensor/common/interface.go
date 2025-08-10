@@ -20,7 +20,7 @@ type Sensor interface {
 	Stop() error
 
 	// GetEvents returns a channel of collected events
-	GetEvents() <-chan models.BaseEvent
+	GetEvents() <-chan models.Event
 
 	// GetStats returns sensor statistics
 	GetStats() SensorStats
@@ -129,7 +129,7 @@ type SensorManager interface {
 	StopAll() error
 
 	// GetAggregatedEvents returns a channel with events from all sensors
-	GetAggregatedEvents() <-chan models.BaseEvent
+	GetAggregatedEvents() <-chan models.Event
 
 	// GetAggregatedStats returns combined statistics from all sensors
 	GetAggregatedStats() map[string]SensorStats

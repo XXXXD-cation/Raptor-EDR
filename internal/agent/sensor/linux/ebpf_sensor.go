@@ -14,7 +14,7 @@ import (
 // EBPFSensor implements the Sensor interface for Linux using eBPF
 type EBPFSensor struct {
 	config     common.SensorConfig
-	eventChan  chan models.BaseEvent
+	eventChan  chan models.Event
 	stats      common.SensorStats
 	filters    []common.FilterRule
 	running    bool
@@ -27,7 +27,7 @@ type EBPFSensor struct {
 // NewEBPFSensor creates a new eBPF-based sensor for Linux
 func NewEBPFSensor() *EBPFSensor {
 	return &EBPFSensor{
-		eventChan: make(chan models.BaseEvent, 1000), // Buffered channel
+		eventChan: make(chan models.Event, 1000), // Buffered channel
 		stopChan:  make(chan struct{}),
 		stats:     common.SensorStats{},
 	}
@@ -111,7 +111,7 @@ func (s *EBPFSensor) Stop() error {
 }
 
 // GetEvents returns a channel of collected events
-func (s *EBPFSensor) GetEvents() <-chan models.BaseEvent {
+func (s *EBPFSensor) GetEvents() <-chan models.Event {
 	return s.eventChan
 }
 
@@ -256,7 +256,7 @@ func (s *EBPFSensor) simulateProcessEvent() {
 	}
 
 	// Apply filters
-	if s.shouldFilterEvent(event.BaseEvent) {
+	if s.shouldFilterEvent(event) {
 		s.mu.Lock()
 		s.stats.EventsFiltered++
 		s.mu.Unlock()
@@ -264,7 +264,7 @@ func (s *EBPFSensor) simulateProcessEvent() {
 	}
 
 	select {
-	case s.eventChan <- event.BaseEvent:
+	case s.eventChan <- event:
 		s.mu.Lock()
 		s.stats.EventsCollected++
 		s.mu.Unlock()
@@ -277,7 +277,7 @@ func (s *EBPFSensor) simulateProcessEvent() {
 }
 
 // shouldFilterEvent checks if an event should be filtered out
-func (s *EBPFSensor) shouldFilterEvent(event models.BaseEvent) bool {
+func (s *EBPFSensor) shouldFilterEvent(event models.Event) bool {
 	// TODO: Implement proper filtering logic based on filter rules
 	return false
 } 

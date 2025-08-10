@@ -11,22 +11,22 @@ import (
 // EventRepository defines the interface for storing and retrieving telemetry events
 type EventRepository interface {
 	// Store persists events to the storage backend
-	Store(ctx context.Context, events []models.BaseEvent) error
+	Store(ctx context.Context, events []models.Event) error
 	
 	// StoreBatch persists a batch of events with metadata
 	StoreBatch(ctx context.Context, batch models.TelemetryBatch) error
 	
 	// Find retrieves events based on query criteria
-	Find(ctx context.Context, query EventQuery) ([]models.BaseEvent, error)
+	Find(ctx context.Context, query EventQuery) ([]models.Event, error)
 	
 	// FindByID retrieves a specific event by its ID
-	FindByID(ctx context.Context, id string) (*models.BaseEvent, error)
+	FindByID(ctx context.Context, id string) (models.Event, error)
 	
 	// FindByAgent retrieves events from a specific agent
-	FindByAgent(ctx context.Context, agentID string, limit int, offset int) ([]models.BaseEvent, error)
+	FindByAgent(ctx context.Context, agentID string, limit int, offset int) ([]models.Event, error)
 	
 	// FindByTimeRange retrieves events within a time range
-	FindByTimeRange(ctx context.Context, start, end time.Time, limit int) ([]models.BaseEvent, error)
+	FindByTimeRange(ctx context.Context, start, end time.Time, limit int) ([]models.Event, error)
 	
 	// Count returns the total number of events matching the query
 	Count(ctx context.Context, query EventQuery) (int64, error)

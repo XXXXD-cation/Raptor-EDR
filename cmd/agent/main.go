@@ -284,8 +284,8 @@ func (a *Agent) processEvents(ctx context.Context) {
 		case event := <-eventChan:
 			// TODO: Process and send events to server
 			a.log.Debug().
-				Str("event_id", event.ID).
-				Str("event_type", string(event.EventType)).
+				Str("event_id", event.GetID()).
+				Str("event_type", string(event.GetEventType())).
 				Msg("Received event")
 		}
 	}
