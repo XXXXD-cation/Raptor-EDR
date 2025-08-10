@@ -1,0 +1,263 @@
+syntax = "proto3";
+
+package raptor.agent.v1;
+
+option go_package = "github.com/raptor-edr/proto/agent/v1;agentv1";
+
+import "google/protobuf/timestamp.proto";
+
+// AgentService defines the gRPC service for agent-server communication
+service AgentService {
+  // RegisterAgent registers a new agent with the server
+  rpc RegisterAgent(RegisterAgentRequest) returns (RegisterAgentResponse);
+  
+  // SendTelemetry sends telemetry data from agent to server
+  rpc SendTelemetry(stream TelemetryBatch) returns (stream TelemetryResponse);
+  
+  // GetTasks retrieves tasks assigned to the agent
+  rpc GetTasks(GetTasksRequest) returns (GetTasksResponse);
+  
+  // SendTaskResult sends task execution results back to server
+  rpc SendTaskResult(TaskResult) returns (TaskResultResponse);
+  
+  // Heartbeat maintains connection and reports agent status
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+}
+
+// RegisterAgentRequest contains agent registration information
+message RegisterAgentRequest {
+  string agent_id = 1;
+  string hostname = 2;
+  string platform = 3; // linux, windows, macos
+  string version = 4;
+  AgentCapabilities capabilities = 5;
+  map<string, string> tags = 6;
+}
+
+// RegisterAgentResponse contains registration response
+message RegisterAgentResponse {
+  bool success = 1;
+  string message = 2;
+  AgentConfig config = 3;
+}
+
+// AgentCapabilities describes what the agent can collect
+message AgentCapabilities {
+  bool process_events = 1;
+  bool file_events = 2;
+  bool network_events = 3;
+  bool registry_events = 4; // Windows only
+  bool auth_events = 5;
+  repeated string supported_platforms = 6;
+}
+
+// AgentConfig contains configuration sent from server to agent
+message AgentConfig {
+  CollectionConfig collection = 1;
+  repeated FilterRule filters = 2;
+  int32 batch_size = 3;
+  int32 batch_timeout_seconds = 4;
+  int32 heartbeat_interval_seconds = 5;
+}
+
+// CollectionConfig specifies what events to collect
+message CollectionConfig {
+  bool process_events = 1;
+  bool file_events = 2;
+  bool network_events = 3;
+  bool registry_events = 4;
+  bool auth_events = 5;
+  repeated string monitor_paths = 6;
+  repeated string registry_keys = 7; // Windows only
+}
+
+// FilterRule defines event filtering rules
+message FilterRule {
+  string name = 1;
+  string event_type = 2;
+  FilterAction action = 3;
+  FilterCondition condition = 4;
+  map<string, string> fields = 5;
+}
+
+enum FilterAction {
+  FILTER_ACTION_UNSPECIFIED = 0;
+  FILTER_ACTION_ALLOW = 1;
+  FILTER_ACTION_DENY = 2;
+}
+
+enum FilterCondition {
+  FILTER_CONDITION_UNSPECIFIED = 0;
+  FILTER_CONDITION_EQUALS = 1;
+  FILTER_CONDITION_CONTAINS = 2;
+  FILTER_CONDITION_STARTS_WITH = 3;
+  FILTER_CONDITION_ENDS_WITH = 4;
+  FILTER_CONDITION_REGEX = 5;
+}
+
+// TelemetryBatch contains a batch of events from the agent
+message TelemetryBatch {
+  string agent_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  repeated Event events = 3;
+  string signature = 4; // Optional integrity signature
+}
+
+// TelemetryResponse acknowledges receipt of telemetry data
+message TelemetryResponse {
+  bool success = 1;
+  string message = 2;
+  int32 events_processed = 3;
+  int32 events_dropped = 4;
+}
+
+// Event represents a single telemetry event
+message Event {
+  string id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string event_type = 3;
+  string agent_id = 4;
+  string hostname = 5;
+  string platform = 6;
+  map<string, string> tags = 7;
+  
+  // Event-specific data (one of the following)
+  oneof event_data {
+    ProcessEvent process_event = 10;
+    FileEvent file_event = 11;
+    NetworkEvent network_event = 12;
+    RegistryEvent registry_event = 13;
+    AuthEvent auth_event = 14;
+  }
+}
+
+// ProcessEvent represents process creation/termination events
+message ProcessEvent {
+  int32 pid = 1;
+  int32 ppid = 2;
+  string name = 3;
+  string path = 4;
+  string command_line = 5;
+  string user = 6;
+  int32 exit_code = 7; // Only for process exit events
+  map<string, string> hashes = 8; // md5, sha1, sha256
+}
+
+// FileEvent represents file system events
+message FileEvent {
+  string path = 1;
+  string action = 2; // create, modify, delete, rename
+  int32 pid = 3;
+  string process_name = 4;
+  string user = 5;
+  map<string, string> hashes = 6;
+  int64 size = 7;
+}
+
+// NetworkEvent represents network connection events
+message NetworkEvent {
+  int32 pid = 1;
+  string process_name = 2;
+  string protocol = 3; // tcp, udp
+  string local_ip = 4;
+  int32 local_port = 5;
+  string remote_ip = 6;
+  int32 remote_port = 7;
+  string direction = 8; // inbound, outbound
+  string domain = 9;
+}
+
+// RegistryEvent represents Windows registry events
+message RegistryEvent {
+  int32 pid = 1;
+  string process_name = 2;
+  string key_path = 3;
+  string value_name = 4;
+  string value_data = 5;
+  string value_type = 6;
+  string action = 7; // create, modify, delete
+}
+
+// AuthEvent represents authentication events
+message AuthEvent {
+  string username = 1;
+  string domain = 2;
+  string logon_type = 3;
+  string source_ip = 4;
+  bool success = 5;
+  string failure_code = 6;
+}
+
+// GetTasksRequest requests tasks for the agent
+message GetTasksRequest {
+  string agent_id = 1;
+  google.protobuf.Timestamp last_check = 2;
+}
+
+// GetTasksResponse contains tasks assigned to the agent
+message GetTasksResponse {
+  repeated Task tasks = 1;
+}
+
+// Task represents a task assigned to the agent
+message Task {
+  string task_id = 1;
+  string task_type = 2; // collect_file, run_command, update_config, etc.
+  map<string, string> parameters = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp expires_at = 5;
+  int32 priority = 6;
+}
+
+// TaskResult contains the result of task execution
+message TaskResult {
+  string task_id = 1;
+  string agent_id = 2;
+  bool success = 3;
+  string message = 4;
+  bytes data = 5; // Task-specific result data
+  google.protobuf.Timestamp completed_at = 6;
+}
+
+// TaskResultResponse acknowledges receipt of task result
+message TaskResultResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// HeartbeatRequest contains agent status information
+message HeartbeatRequest {
+  string agent_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  AgentStatus status = 3;
+  AgentStats stats = 4;
+}
+
+// HeartbeatResponse contains server response to heartbeat
+message HeartbeatResponse {
+  bool success = 1;
+  string message = 2;
+  AgentConfig config_update = 3; // Optional configuration updates
+}
+
+// AgentStatus represents the current status of the agent
+message AgentStatus {
+  string state = 1; // running, stopped, error, updating
+  string version = 2;
+  google.protobuf.Timestamp last_event_time = 3;
+  int32 active_sensors = 4;
+  repeated string errors = 5;
+}
+
+// AgentStats contains agent performance statistics
+message AgentStats {
+  uint64 events_collected = 1;
+  uint64 events_filtered = 2;
+  uint64 events_dropped = 3;
+  uint64 bytes_sent = 4;
+  double collection_rate = 5; // events per second
+  uint64 uptime_seconds = 6;
+  double memory_usage_mb = 7;
+  double cpu_usage_percent = 8;
+  uint64 error_count = 9;
+} 
