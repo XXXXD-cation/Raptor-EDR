@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/raptor-edr/pkg/models"
+	"github.com/XXXXD-cation/Raptor-EDR/pkg/models"
 )
 
 // Sensor defines the interface that all platform-specific sensors must implement

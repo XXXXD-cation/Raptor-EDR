@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/raptor-edr/pkg/models"
+	"github.com/XXXXD-cation/Raptor-EDR/pkg/models"
 )
 
 // EventRepository defines the interface for storing and retrieving telemetry events

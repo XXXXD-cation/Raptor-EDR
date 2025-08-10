@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package raptor.agent.v1;
 
-option go_package = "github.com/raptor-edr/proto/agent/v1;agentv1";
+option go_package = "github.com/XXXXD-cation/Raptor-EDR/proto/agent/v1;agentv1";
 
 import "google/protobuf/timestamp.proto";
 

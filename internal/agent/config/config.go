@@ -163,7 +163,7 @@ func (c *AgentConfig) Validate() error {
 		return fmt.Errorf("invalid server port: %d", c.Server.Port)
 	}
 	
-	if c.Security.UseTLS && (c.Security.CertFile == "" || c.Security.KeyFile == "") {
+	if c.Server.UseTLS && (c.Security.CertFile == "" || c.Security.KeyFile == "") {
 		return fmt.Errorf("TLS certificate and key files are required when TLS is enabled")
 	}
 	

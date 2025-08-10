@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/raptor-edr/internal/agent/sensor/common"
-	"github.com/raptor-edr/pkg/models"
+	"github.com/XXXXD-cation/Raptor-EDR/internal/agent/sensor/common"
+	"github.com/XXXXD-cation/Raptor-EDR/pkg/models"
 )
 
 // EBPFSensor implements the Sensor interface for Linux using eBPF

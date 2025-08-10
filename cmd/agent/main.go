@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/raptor-edr/internal/agent/config"
-	"github.com/raptor-edr/internal/agent/sensor/common"
-	"github.com/raptor-edr/internal/agent/sensor/linux"
-	"github.com/raptor-edr/internal/agent/comms"
-	"github.com/raptor-edr/pkg/logger"
-	"github.com/raptor-edr/pkg/security"
+	"github.com/XXXXD-cation/Raptor-EDR/internal/agent/config"
+	"github.com/XXXXD-cation/Raptor-EDR/internal/agent/sensor/common"
+	"github.com/XXXXD-cation/Raptor-EDR/internal/agent/sensor/linux"
+	"github.com/XXXXD-cation/Raptor-EDR/internal/agent/comms"
+	"github.com/XXXXD-cation/Raptor-EDR/pkg/logger"
+	"github.com/XXXXD-cation/Raptor-EDR/pkg/security"
 	"github.com/rs/zerolog"
 	"runtime"
 )

@@ -11,9 +11,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
-	agentv1 "github.com/raptor-edr/proto/agent/v1"
-	"github.com/raptor-edr/pkg/models"
+	agentv1 "github.com/XXXXD-cation/Raptor-EDR/proto/agent/v1"
+	"github.com/XXXXD-cation/Raptor-EDR/pkg/models"
 )
 
 // GRPCClient handles gRPC communication with the server
